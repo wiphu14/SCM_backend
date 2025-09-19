@@ -1,0 +1,83 @@
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+require_once(APPPATH."/models/MY_CI_Model.php");
+
+class Member extends MY_CI_Model { // คลาส Model_template สืบทอดคุณสมบัติของ CI_Model
+    
+	/**
+     * Constuct
+     */
+    public function __construct()
+    {
+		parent::__construct();
+		$this->tblName=TBL_MEMBER;
+	} //.End function
+    
+    /**
+     * get list of members
+     */
+    public function members(){
+        $query = $this->db->get($this->tblName);
+        return $query->result();
+    }
+
+    /**
+     * update member or new register
+     * @return int
+     */
+    public function update($data){
+        if(!array_key_exists("id",$data)){
+            $this->isFirstChange($data);
+            $this->db->insert($this->tblName,$data);
+        }else{ 
+            $this->isNoFirstChange($data);
+            $this->db->where("id",$data['id']);
+            $this->db->update($this->tblName,$data);
+        }
+
+        if($this->db->affected_rows()>0){
+            return true;
+        }
+    } // .End updateMember
+
+    public function getByUnameAndPword($u,$p){
+        $query = $this->db->where('uname',$u)->where('pword',$p)->get($this->tblName);
+        return $query->result();
+    } // .End getByUnameAndPword
+
+    public function getById($id){
+        $query = $this->db->where('id',$id)->get($this->tblName);
+        return $query->result();
+    } // .end getById()
+
+    /**
+     * member ban or not
+     */
+    public function memberban($data){
+        $b = false;
+        $this->db->where("id",$data['id']);
+        $this->db->update($this->tblName,$data);
+
+        if($this->db->affected_rows()>0){
+            $b = true;
+        }
+
+        return $b;
+    } // .End memberban()	
+
+    public function deleteById($id){
+        $query = $this->db->where('id',$id)->delete($this->tblName);
+        return $query->result();
+    } // .end deleteByName()
+
+    public function getIdLastRec(){
+        $query = $this->db->order_by('id','DESC')->limit(1)->get($this->tblName);
+        return $query->result();
+    } // .end deleteByName()
+
+    public function count(){
+        $result = $this->db->count_all_results($this->tblName);
+        return $result;
+    } // .end deleteByName()
+}
+?>
